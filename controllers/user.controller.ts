@@ -10,6 +10,7 @@ import { accessTokenOptions, refreshTokenOptions, sendToken } from "../utils/jwt
 import { redis } from "../utils/redis";
 import { getUserById } from "../services/user.service";
 import { trusted } from "mongoose";
+import cloudinary from "cloudinary"
 require("dotenv").config()
 
 
@@ -295,3 +296,44 @@ export const updatePassword = CatchAsyncError(async (req: Request, res: Response
         return next(new ErrorHandler(error.message, 400));
     }
 });
+
+//update profile avatar picture
+interface IUploadProfilePicture {
+    avatar: string
+}
+export const uploadProfilePicture = CatchAsyncError(async (req: Request, res: Response, next: NextFunction) => {
+    try {
+
+        const { avatar } = req.body as IUploadProfilePicture
+        const userId = req.user?._id as string
+        const user = await userModel.findById(userId)
+        // if the user has one avatar then call this if
+        if (avatar && user) {
+            if (user?.avatar?.public_id) {
+                //delate the old image
+                await cloudinary.v2.uploader.destroy(user?.avatar?.public_id)
+                const myCloud = await cloudinary.v2.uploader.upload(avatar, { folder: "avatars", width: 150 })
+                user.avatar = {
+                    public_id: myCloud.public_id,
+                    url: myCloud.secure_url
+                }
+
+            } else {
+                const myCloud = await cloudinary.v2.uploader.upload(avatar, { folder: "avatars", width: 150 })
+                user.avatar = {
+                    public_id: myCloud.public_id,
+                    url: myCloud.secure_url
+                }
+            }
+        }
+        await user?.save()
+        await redis.set(userId, JSON.stringify(user))
+        res.status(200).json({
+            success: true,
+            user
+        })
+
+    } catch (error: any) {
+        return next(new ErrorHandler(error.message, 400))
+    }
+})
