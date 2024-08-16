@@ -15,11 +15,11 @@ interface IReview extends Document {
     commentReplies: IComment[]
 }
 interface ILink extends Document {
-    tittle: string,
+    title: string,
     url: string
 }
 interface ICourseData extends Document {
-    tittle: string,
+    title: string,
     description: string,
     videoUrl: string,
     videoThumbnail: object,
@@ -57,7 +57,7 @@ const reviewSchema = new Schema<IReview>({
     comment: String
 })
 const linkSchema = new Schema<ILink>({
-    tittle: String,
+    title: String,
     url: String,
 })
 const commentSchema = new Schema<IComment>({
@@ -68,8 +68,7 @@ const commentSchema = new Schema<IComment>({
 const courseDataSchema = new Schema<ICourseData>({
     videoUrl: String,
     videoSection: String,
-    videoThumbnail: Object,
-    tittle: String,
+    title: String,
     description: String,
     videoLength: Number,
     videoPlayer: String,
@@ -101,11 +100,11 @@ const courseSchema = new Schema<ICourse>({
     },
     thumbnail: {
         public_id: {
-            require: true,
+           
             type: String
         },
         url: {
-            require: true,
+            
             type: String
         },
     },
@@ -117,7 +116,8 @@ const courseSchema = new Schema<ICourse>({
         type:String,
         required:true
     },
-    demoUrl:{type:String,
+    demoUrl:{
+        type:String,
         required:true
 
     },
