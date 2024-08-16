@@ -13,7 +13,7 @@ export interface IUser extends Document {
     };
     role: string;
     isVerified: boolean;
-    courses: Array<{ courseId: string; }>;
+    courses: Array<{ courseId: string}>;
     comparePassword: (password: string) => Promise<boolean>;
     SignAccessToken:()=>string;
     SignRefreshToken:()=>string;
@@ -44,18 +44,18 @@ password:{
 avatar:{
     public_id:String, 
     url:String,},
-    role:{
+ role:{
         type:String,
         default:"user"
     },
-    isVerified:{
+isVerified:{
       type:Boolean,
       default:false
 
     },
-    courses:{
+courses:[{
       courseId:String  
-    },
+    }],
 },{timestamps:true})
   
 // hash password

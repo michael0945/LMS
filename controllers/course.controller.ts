@@ -146,5 +146,35 @@ export const getAllCourses = CatchAsyncError(async (req: Request, res: Response,
 
     }
 })
+// get course content only for valid user
+export const getCourseByUser = CatchAsyncError(async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const userCourseList = req.user?.courses;  // User's course list
+        const courseId = req.params.id;  // Get the course ID from request params
 
+        // Check if the course exists for the user
+        const courseExist = userCourseList?.find((course: any) => course._id.toString() === courseId);
+        if (!courseExist) {
+            return next(new ErrorHandler('You are not eligible to access this course', 400));
+        }
+
+        // Fetch the course from the database
+        const course = await CourseModel.findById(courseId);
+        if (!course) {
+            return next(new ErrorHandler('Course not found', 404));
+        }
+
+        // Fetch the course content (courseData)
+        const content = course?.courseData;
+
+        // Return the entire course along with the content
+        res.status(200).json({
+            success: true,
+            // course,  // Include full course details
+            content  // Course content (courseData)
+        });
+    } catch (error: any) {
+        return next(new ErrorHandler(error.message, 400));
+    }
+});
 
