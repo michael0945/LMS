@@ -9,6 +9,7 @@ import mongoose from "mongoose";
 import path from "path"
 import ejs, { name } from "ejs";
 import sendMail from "../utils/sendingMail";
+import { newOrder } from "../services/order.service";
 
 
 
@@ -127,53 +128,53 @@ export const getSingleCourse = CatchAsyncError(async (req: Request, res: Respons
 
 
 // get all courses --without purchasing
-// export const getAllCourses = CatchAsyncError(async (req: Request, res: Response, next: NextFunction) => {
-//     try {
-//         // Clear any existing Redis cache
-//         await redis.del("allCourses");
-
-//         // Fetch all courses that are not deleted, excluding sensitive fields
-//         const courses = await CourseModel.find({ isDeleted: { $ne: true } })
-//             .select("-courseData.videoUrl -courseData.suggestion -courseData.questions -courseData.links");
-
-//         console.log("Fetched courses from DB:", courses); // Log the fetched data
-
-//         // Cache the full course data
-//         await redis.set("allCourses", JSON.stringify(courses), 'EX', 3600);
-
-//         res.status(200).json({
-//             success: true,
-//             courses
-//         });
-
-//     } catch (error: any) {
-//         return next(new ErrorHandler(error.message, 400));
-//     }
-// });
 export const getAllCourses = CatchAsyncError(async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const isCacheExist = await redis.get("allCourses");
-        if (isCacheExist) {
-            const courses = JSON.parse(isCacheExist);
-            res.status(200).json({
-                success: true,
-                courses
-            });
-        } else {
-            // Assuming isDeleted is a boolean field in your schema that marks a course as deleted
-            const courses = await CourseModel.find()
-                .select("-courseData.videoUrl -courseData.suggestion -courseData.questions -courseData.links");
+        // Clear any existing Redis cache
+        await redis.del("allCourses");
 
-            await redis.set("allCourses", JSON.stringify(courses));
-            res.status(200).json({
-                success: true,
-                courses
-            });
-        }
+        // Fetch all courses that are not deleted, excluding sensitive fields
+        const courses = await CourseModel.find({ isDeleted: { $ne: true } })
+            .select("-courseData.videoUrl -courseData.suggestion -courseData.questions -courseData.links");
+
+        console.log("Fetched courses from DB:", courses); // Log the fetched data
+
+        // Cache the full course data
+        await redis.set("allCourses", JSON.stringify(courses), 'EX', 3600);
+
+        res.status(200).json({
+            success: true,
+            courses
+        });
+
     } catch (error: any) {
         return next(new ErrorHandler(error.message, 400));
     }
 });
+// export const getAllCourses = CatchAsyncError(async (req: Request, res: Response, next: NextFunction) => {
+//     try {
+//         const isCacheExist = await redis.get("allCourses");
+//         if (isCacheExist) {
+//             const courses = JSON.parse(isCacheExist);
+//             res.status(200).json({
+//                 success: true,
+//                 courses
+//             });
+//         } else {
+//             // Assuming isDeleted is a boolean field in your schema that marks a course as deleted
+//             const courses = await CourseModel.find()
+//                 .select("-courseData.videoUrl -courseData.suggestion -courseData.questions -courseData.links");
+
+//             await redis.set("allCourses", JSON.stringify(courses));
+//             res.status(200).json({
+//                 success: true,
+//                 courses
+//             });
+//         }
+//     } catch (error: any) {
+//         return next(new ErrorHandler(error.message, 400));
+//     }
+// });
 // get course content only for valid user
 export const getCourseByUser = CatchAsyncError(async (req: Request, res: Response, next: NextFunction) => {
     try {
@@ -411,6 +412,7 @@ export const addReplyToReview= CatchAsyncError(async(req:Request,res:Response,ne
             success:true,
             course
         })
+        
     } catch (error:any) {
         return next(new ErrorHandler(error.message,400))
         
