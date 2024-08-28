@@ -18,17 +18,14 @@ export const createOrder = CatchAsyncError(async (req: Request, res: Response, n
             return next(new ErrorHandler("User not found", 404));
         }
 
-       // Updated logic to check if the user has already purchased the course
-// Updated logic to check if the user has already purchased the course
-const purchasedCourse = user.courses.find((course: any) => {
-    return course.courseId === courseId; // Compare with courseId field in user's courses
-});
+        // Check if the user has already purchased the course
+        const purchasedCourse = user.courses.find((course: any) => {
+            return course.courseId === courseId; // Compare with courseId field in user's courses
+        });
 
-if (purchasedCourse) {
-    return next(new ErrorHandler("You have already purchased this course", 400));
-}
-
-
+        if (purchasedCourse) {
+            return next(new ErrorHandler("You have already purchased this course", 400));
+        }
 
         const course = await CourseModel.findById(courseId);
         if (!course) {
@@ -78,11 +75,10 @@ if (purchasedCourse) {
             title: "New Order",
             message: `You have a new order for ${course.name}`
         });
-        if(course.purchased){
-            course.purchased +=1
-        }
-        await course.save()
-        newOrder(data,res,next)
+
+        // Increment the purchased value correctly
+        course.purchased = (course.purchased || 0) + 1;
+        await course.save();
 
     } catch (error: any) {
         console.error('Error in createOrder:', error.message);
