@@ -2,7 +2,7 @@ import { Request, Response, NextFunction } from "express";
 import { CatchAsyncError } from "../middlewere/catchAsyncError";
 import ErrorHandler from "../utils/ErrorHandler";
 import cloudinary from 'cloudinary'
-import { createCourse } from "../services/course.service";
+import { createCourse, getAllCourseService } from "../services/course.service";
 import CourseModel from "../models/course.model";
 import { redis } from "../utils/redis";
 import mongoose from "mongoose";
@@ -11,6 +11,7 @@ import ejs, { name } from "ejs";
 import sendMail from "../utils/sendingMail";
 import { newOrder } from "../services/order.service";
 import NotificationModel from "../models/notificationModel";
+
 
 
 
@@ -428,5 +429,13 @@ export const addReplyToReview = CatchAsyncError(async (req: Request, res: Respon
     } catch (error: any) {
         return next(new ErrorHandler(error.message, 400))
 
+    }
+})
+// get all Courses ---only for admins
+export const getAllCourse=CatchAsyncError(async(req:Request,res:Response,next:NextFunction)=>{
+    try {
+        getAllCourseService(res)
+    } catch (error:any) {
+        return next(new ErrorHandler(error.message,400))
     }
 })
