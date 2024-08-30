@@ -111,7 +111,7 @@ export const getSingleCourse = CatchAsyncError(async (req: Request, res: Respons
             }
 
             // Optionally, you can store the fetched course data in Redis for future requests
-            await redis.set(courseId, JSON.stringify(course));
+            await redis.set(courseId, JSON.stringify(course),"EX",604800);// 7 days
 
             // Return the course data from MongoDB
             return res.status(200).json({
